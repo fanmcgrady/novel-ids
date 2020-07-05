@@ -1,0 +1,8 @@
+.DS_Store
+samples
+samples/
+venv/
+*.xml
+*.pyc
+*.pkl
+result.txt
