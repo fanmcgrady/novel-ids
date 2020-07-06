@@ -10,6 +10,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.svm import SVC
+import time
 
 
 CLASSIFIER_POOL = {
@@ -22,7 +23,8 @@ CLASSIFIER_POOL = {
     'Ada': AdaBoostClassifier(n_estimators=100),
     'BAGGING': BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5),
     #'SVM': SVC(kernel='rbf', probability=True, gamma='auto'),
-    'SVM': SVC(),
+    # SVM训练太慢，原因是一直没收敛，需要调一下参数
+    #'SVM': SVC(),
     'GBDT': GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
                                        max_depth=1, random_state=0)
 }
@@ -56,24 +58,18 @@ class Classifier():
         return self.classify(data, label)
 
     def classify(self, classifier):
-        # x_train, x_test, y_train, y_test = train_test_split(data, label, test_size=0.3, random_state=0)
 
+        # 返回的result字典，里面存有分类的各种评价结果
+        result = {}
         x_train, x_test, y_train, y_test = train_test_split(self.data, self.label, test_size=0.2, random_state=0)
-        # print(y_train)
-        # data_test = load_data("data_test.csv")
-        # for i in reversed(range(len(state))):
-        #     if state[i] == 0:
-        #         for index in range(len(data_test)):
-        #             del data_test[index][i]
-        # y_test = np.array(data_test)[:, -1]
-        # x_test = np.array(data_test)[:, :-1]
-
+        # 训练
+        train_start = time.time()
         classifier.fit(x_train, y_train)
+        train_end = time.time()
+        train_time = train_end - train_start
+        sample_number = len(x_test)
 
-        # y_predict = classifier.predict(x_test)
-        # result = metrics.accuracy_score(y_test, y_predict)
-        # print(result)
-        #
+
         # data_test = load_data("data_test.csv")
         # state = []
         # for i in range(183):
@@ -93,9 +89,24 @@ class Classifier():
         # return result
         # scores = cross_val_score(classifier, x_train, y_train, cv=10)
 
+        # 测试
+        test_start = time.time()
         y_predict = classifier.predict(x_test)
-        result = metrics.accuracy_score(y_test, y_predict)
-        # return result
+        test_end = time.time()
+        test_time = test_end - test_start
+
+
+        accuracy = metrics.accuracy_score(y_test, y_predict)
+        precision = metrics.precision_score(y_test, y_predict, pos_label='1', average='binary')
+        recall = metrics.recall_score(y_test, y_predict, pos_label='1', average='binary')
+        f1_score = metrics.f1_score(y_test, y_predict, pos_label='1', average='binary')
+        result['Accuracy'] = accuracy
+        result['Precision'] = precision
+        result['Recall'] = recall
+        result['F1 Score'] = f1_score
+        result['Train Time'] = train_time
+        result['Test Time For Per Sample'] = test_time/sample_number
+
         #
         # false_positive_rate, true_positive_rate, thresholds = metrics.roc_curve(y_test,y_predict)
         # #
