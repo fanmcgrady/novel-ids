@@ -1,6 +1,6 @@
 import csv
 import os
-
+import numpy as np
 from rl.classifier import Classifier, CLASSIFIER_POOL
 
 protocol_type = ['tcp', 'udp', 'icmp']
@@ -32,6 +32,7 @@ def load_csv(data_path):
             # 处理flag
             row[3] = str(flag.index(row[3]))
             # 处理label
+
             if row[-2] == 'normal':
                 row[-2] = '0'
             else:
@@ -39,6 +40,7 @@ def load_csv(data_path):
 
             data.append(row[:-2])
             label.append(row[-2])
+    data = np.array(data, dtype='float')
     return data, label
 
 

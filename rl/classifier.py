@@ -1,19 +1,30 @@
 import numpy as np
 from sklearn import metrics
-from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import BaggingClassifier
 from sklearn.svm import SVC
-from enum import Enum
+
 
 CLASSIFIER_POOL = {
     'RandomForest': RandomForestClassifier(random_state=0, n_estimators=500),
-    'SVM': SVC(kernel='rbf', probability=True, gamma='auto'),
     'KNN': KNeighborsClassifier(),
     'NB': GaussianNB(),
-    'DT': tree.DecisionTreeClassifier()
+    'DT': DecisionTreeClassifier(),
+    'MLP': MLPClassifier(solver='lbfgs', alpha=1e-5,
+                         hidden_layer_sizes=(10, 2), random_state=1),
+    'Ada': AdaBoostClassifier(n_estimators=100),
+    'BAGGING': BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5),
+    #'SVM': SVC(kernel='rbf', probability=True, gamma='auto'),
+    'SVM': SVC(),
+    'GBDT': GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
+                                       max_depth=1, random_state=0)
 }
 
 class Classifier():
