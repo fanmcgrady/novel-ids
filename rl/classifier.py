@@ -18,15 +18,13 @@ CLASSIFIER_POOL = {
     'KNN': KNeighborsClassifier(),
     'NB': GaussianNB(),
     'DT': DecisionTreeClassifier(),
-    'MLP': MLPClassifier(solver='lbfgs', alpha=1e-5,
-                         hidden_layer_sizes=(10, 2), random_state=1),
+    'MLP': MLPClassifier(hidden_layer_sizes=(32,16), solver='adam', alpha=1e-5),
     'Ada': AdaBoostClassifier(n_estimators=100),
     'BAGGING': BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5),
-    #'SVM': SVC(kernel='rbf', probability=True, gamma='auto'),
     # SVM训练太慢，原因是一直没收敛，需要调一下参数
-    #'SVM': SVC(),
+    'SVM': SVC(kernel='rbf', probability=True, gamma='auto', max_iter=100),
     'GBDT': GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
-                                       max_depth=1, random_state=0)
+                                     max_depth=1, random_state=0)
 }
 
 class Classifier():
@@ -34,34 +32,29 @@ class Classifier():
         self.data = data
         self.label = label
 
-    def get_reward(self, state,  # state: 标记指标是否选取的数组
-                   data_path):  # data_path:
-
-        count = len(state)  # 本次选的指标数目
-        # print(count)
-
-        data = self.data
-
-        for i in reversed(range(len(state) - 1)):
-            if state[i] == 0:
-                count -= 1
-                for index in range(len(data)):
-                    del data[index][i]
-
-        if count == 0:
-            return 0
-        label = np.array(data)[:, -1]
-        data = np.array(data)[:, :-1]
-
-        # precision, recall = classify(data, label, method)
-        # return 0
-        return self.classify(data, label)
-
-    def classify(self, classifier):
+    # feature包含选择的特征的index,默认提取全部特征
+    def classify(self, classifier, feature=None):
 
         # 返回的result字典，里面存有分类的各种评价结果
         result = {}
-        x_train, x_test, y_train, y_test = train_test_split(self.data, self.label, test_size=0.2, random_state=0)
+        # 存放提取后的特征
+        x = []
+
+        if feature == None:
+            x = self.data
+        else:
+            # 把对应的特征取出来
+            for data_row in self.data:
+                new_data_row = []
+                for i in feature:
+                    new_data_row.append(data_row[i])
+                print(len(new_data_row))
+                print(new_data_row)
+                x.append(new_data_row)
+
+        # 划分训练集、测试集
+        x_train, x_test, y_train, y_test = train_test_split(x, self.label, test_size=0.2, random_state=0)
+
         # 训练
         train_start = time.time()
         classifier.fit(x_train, y_train)
@@ -129,3 +122,27 @@ class Classifier():
         # return scores.mean()
         # print(scores.mean())
         # return precision_score(y_test, y_predict), recall_score(y_test, y_predict)
+
+
+    def get_reward(self, state,  # state: 标记指标是否选取的数组
+                   data_path):  # data_path:
+
+        count = len(state)  # 本次选的指标数目
+        # print(count)
+
+        data = self.data
+
+        for i in reversed(range(len(state) - 1)):
+            if state[i] == 0:
+                count -= 1
+                for index in range(len(data)):
+                    del data[index][i]
+
+        if count == 0:
+            return 0
+        label = np.array(data)[:, -1]
+        data = np.array(data)[:, :-1]
+
+        # precision, recall = classify(data, label, method)
+        # return 0
+        return self.classify(data, label)
