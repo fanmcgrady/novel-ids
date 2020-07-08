@@ -1,5 +1,5 @@
 from rl.classifier import Classifier,CLASSIFIER_POOL
-from utils import load_csv
+from utils import load_data,data_preprocessing
 import time
 
 data_path = 'dataset/preprocessed/KDDTrain+.csv'
@@ -7,8 +7,12 @@ result_path = 'result/'
 
 # 使用全部特征
 def full_feature(data_path):
-    data, label = load_csv(data_path)
-    classifier = Classifier(data, label)
+    data, label = load_data(data_path)
+    processed_data = data_preprocessing(data)
+    print(type(data))
+    print(type(label))
+    print(label)
+    classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
     result_file = 'full_feature_result_'+date+'.txt'
     with open(result_path + result_file, 'w+') as f:

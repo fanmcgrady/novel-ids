@@ -50,6 +50,7 @@ def load_csv(path, original=False):
 
 # 保存csv
 def save_csv(path, data, label):
+
     if os.path.exists(path):
         os.remove(path)
 
@@ -58,6 +59,7 @@ def save_csv(path, data, label):
         for i in range(len(data)):
             data[i].append(label[i])
             writer.writerow(data[i])
+
     print("Save data successfully to: {}".format(path))
 
 # 数据预处理
@@ -68,6 +70,21 @@ def data_preprocessing(data):
     preprocessed_data = min_max_scaler.fit_transform(data)
 
     return preprocessed_data
+
+def load_data(path):
+
+    data = []
+    label = []
+
+    with open(path) as f:
+        for row in f:
+            row = row.split(',')
+            data.append(row[:-1])
+            # 去掉换行
+            temp = row[-1].replace('\n', '')
+            label.append(temp)
+
+    return data, label
 
 
 if __name__ == '__main__':
@@ -85,5 +102,7 @@ if __name__ == '__main__':
     #     print('Train Time : {}'.format(result['Train Time']))
     #     print('Test Time For Per Sample : {}'.format(result['Test Time For Per Sample']))
     #     print('----------------------------------------------------------')
-    data, label = load_csv(data_path)
-    save_csv(save_path, data, label)
+    # data, label = load_csv(data_path)
+    # save_csv(save_path, data, label)
+    path = data_path = 'dataset/preprocessed/KDDTrain+.csv'
+    data, label = load_data(path)

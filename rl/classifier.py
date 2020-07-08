@@ -90,9 +90,9 @@ class Classifier():
 
 
         accuracy = metrics.accuracy_score(y_test, y_predict)
-        precision = metrics.precision_score(y_test, y_predict, pos_label='1.0', average='binary')
-        recall = metrics.recall_score(y_test, y_predict, pos_label='1.0', average='binary')
-        f1_score = metrics.f1_score(y_test, y_predict, pos_label='1.0', average='binary')
+        precision = metrics.precision_score(y_test, y_predict, pos_label='1', average='binary')
+        recall = metrics.recall_score(y_test, y_predict, pos_label='1', average='binary')
+        f1_score = metrics.f1_score(y_test, y_predict, pos_label='1', average='binary')
         result['Accuracy'] = accuracy
         result['Precision'] = precision
         result['Recall'] = recall
