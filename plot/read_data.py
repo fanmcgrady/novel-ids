@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 file = "result/DT_9.txt"
 t_max = 0
 e_max = 0

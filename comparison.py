@@ -2,7 +2,7 @@ from rl.classifier import Classifier,CLASSIFIER_POOL
 from utils import load_csv
 import time
 
-data_path = 'dataset/KDDTrain+.csv'
+data_path = 'dataset/preprocessed/KDDTrain+.csv'
 result_path = 'result/'
 
 # 使用全部特征

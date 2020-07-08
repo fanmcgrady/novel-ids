@@ -22,7 +22,7 @@ CLASSIFIER_POOL = {
     'Ada': AdaBoostClassifier(n_estimators=100),
     'BAGGING': BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5),
     # SVM训练太慢，原因是一直没收敛，需要调一下参数
-    'SVM': SVC(kernel='rbf', probability=True, gamma='auto', max_iter=100),
+    # 'SVM': SVC(kernel='rbf', probability=True, gamma='auto', max_iter=100),
     'GBDT': GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
                                      max_depth=1, random_state=0)
 }
@@ -90,9 +90,9 @@ class Classifier():
 
 
         accuracy = metrics.accuracy_score(y_test, y_predict)
-        precision = metrics.precision_score(y_test, y_predict, pos_label='1', average='binary')
-        recall = metrics.recall_score(y_test, y_predict, pos_label='1', average='binary')
-        f1_score = metrics.f1_score(y_test, y_predict, pos_label='1', average='binary')
+        precision = metrics.precision_score(y_test, y_predict, pos_label='1.0', average='binary')
+        recall = metrics.recall_score(y_test, y_predict, pos_label='1.0', average='binary')
+        f1_score = metrics.f1_score(y_test, y_predict, pos_label='1.0', average='binary')
         result['Accuracy'] = accuracy
         result['Precision'] = precision
         result['Recall'] = recall
