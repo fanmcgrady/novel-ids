@@ -122,12 +122,11 @@ def main():
             terminal = False
             reward = 0
             while not terminal:
-                # print("count is {}".format(count))
                 action, q, ga = agent.act_and_train(
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
                 action = int(action)
                 state, reward, terminal = env.step(action)
-                # print("episode:{}, action:{}, greedy action:{}, reward = {}".format(episode, action, ga, reward))
+                print("episode:{}, action:{}, greedy action:{}, reward = {}".format(episode, action, ga, reward))
 
                 if terminal:
                     state_human = []
@@ -178,7 +177,7 @@ def main():
                                      phi=phi, minibatch_size=minibatch_size,
                                      target_update_method='hard',
                                      soft_update_tau=1e-2,
-                                     episodic_update=False,
+                                     # episodic_update=False,
                                      gpu=args.gpu,  # 设置是否使用gpu
                                      episodic_update_len=16)
         return agent
