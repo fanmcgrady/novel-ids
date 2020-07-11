@@ -31,5 +31,11 @@ def full_feature(data_path):
         f.write('Saved time: '+time.strftime('%Y/%m/%d/%H:%M:%S'))
     print('Training complete! The result was saved to '+result_path+result_file)
 
+# xx的方法,使用了
+def method():
+    pass
+
+
 if __name__ == '__main__':
-    full_feature(data_path=data_path)
+    #full_feature(data_path=data_path)
+    pass
