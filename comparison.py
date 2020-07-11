@@ -9,9 +9,6 @@ result_path = 'result/'
 def full_feature(data_path):
     data, label = load_data(data_path)
     processed_data = data_preprocessing(data)
-    print(type(data))
-    print(type(label))
-    print(label)
     classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
     result_file = 'full_feature_result_'+date+'.txt'
@@ -37,5 +34,5 @@ def method():
 
 
 if __name__ == '__main__':
-    #full_feature(data_path=data_path)
-    pass
+    full_feature(data_path=data_path)
+    # pass

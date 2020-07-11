@@ -122,27 +122,3 @@ class Classifier():
         # return scores.mean()
         # print(scores.mean())
         # return precision_score(y_test, y_predict), recall_score(y_test, y_predict)
-
-
-    def get_reward(self, state,  # state: 标记指标是否选取的数组
-                   data_path):  # data_path:
-
-        count = len(state)  # 本次选的指标数目
-        # print(count)
-
-        data = self.data
-
-        for i in reversed(range(len(state) - 1)):
-            if state[i] == 0:
-                count -= 1
-                for index in range(len(data)):
-                    del data[index][i]
-
-        if count == 0:
-            return 0
-        label = np.array(data)[:, -1]
-        data = np.array(data)[:, :-1]
-
-        # precision, recall = classify(data, label, method)
-        # return 0
-        return self.classify(data, label)

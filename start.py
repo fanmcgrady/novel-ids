@@ -1,6 +1,5 @@
 import argparse
 import time
-from enum import Enum
 
 import chainer
 import chainer.functions as F
@@ -8,14 +7,12 @@ import chainer.links as L
 import numpy as np
 from chainer import optimizers
 from chainerrl import replay_buffer, explorers
+from chainerrl.action_value import DiscreteActionValue
+from chainerrl.agents import double_dqn
 
-from rl import env as Env, agent as DDQN, action_value as ActionValue
-
-
-class Classifier(Enum):
-    RandomForest = 0
-    KNN = 1
-
+import utils
+from rl import env as Env
+from rl.classifier import CLASSIFIER_POOL
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--result-file', type=str, default='result.txt')
@@ -24,12 +21,10 @@ parser.add_argument('--gpu', type=int, default=-1)
 args = parser.parse_args()
 
 # 可变参数
-data = "generate_data/data_test.csv"
-feature_number = 163  # 特征总数量
+feature_number = 41  # 特征总数量
 feature_max_count = args.max_feature  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000
 net_layers = [64, 32]
-classifier = Classifier.RandomForest
 
 
 # 每一轮逻辑如下
@@ -81,17 +76,15 @@ def main():
                 else:
                     x = f(x)
 
-            return ActionValue.DiscreteActionValue(x)
+            return DiscreteActionValue(x)
 
     def evaluate(env, agent, current):
         for i in range(1):
             print("evaluate episode: {}".format(current))
             state = env.reset()
             terminal = False
-            count = 0
             while not terminal:
                 action, q = agent.act(state)
-                if action != len(state): count += 1
                 state, terminal, reward = env.step(action)
 
                 print("action = {}".format(action, q))
@@ -110,18 +103,28 @@ def main():
                                 .format(current, reward, len(state_human), state_human)
                         )
 
+    # 开始训练
+    # def train_agent(env, agent):
+    #     train_agent_with_evaluation(
+    #         agent, env,
+    #         steps=10000,  # Train the graduation_agent for this many rounds steps
+    #         max_episode_len=MAX_EPISODE,  # Maximum length of each episodes
+    #         eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
+    #         eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
+    #         outdir='result',  # Save everything to 'result' directory
+    #     )
+    #
+    #     return env, agent
+
     def train_agent(env, agent):
         for episode in range(MAX_EPISODE):
             state = env.reset()
             terminal = False
-            start = time.time()
             reward = 0
-            count = 0
             while not terminal:
                 # print("count is {}".format(count))
                 action, q, ga = agent.act_and_train(
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
-                if action != len(state): count += 1
                 action = int(action)
                 state, reward, terminal = env.step(action)
                 # print("episode:{}, action:{}, greedy action:{}, reward = {}".format(episode, action, ga, reward))
@@ -136,17 +139,15 @@ def main():
                                 .format(episode, reward, len(state_human), state_human))
                         print(" episode:{}, reward = {}, state count = {}, state:{}".format(
                             episode, reward, len(state_human), state_human))
-                        if action != len(state):
-                            agent.stop_episode_and_train(state, reward, terminal)
-                        else:
-                            agent.stop_episode()
+
+                        agent.stop_episode()
                         episode_reward.append(reward)
                         if (episode + 1) % 10 == 0 and episode != 0:
                             evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
         state_size = env.state_size
-        action_size = env.action_size
+        action_size = env.state_size
         q_func = QFunction(state_size, action_size)
 
         start_epsilon = 1.
@@ -170,20 +171,23 @@ def main():
 
         phi = lambda x: x.astype(np.float32, copy=False)
 
-        agent = DDQN.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
-                               explorer=explorer, replay_start_size=replay_start_size,
-                               target_update_interval=10,  # target q网络多久和q网络同步
-                               update_interval=update_interval,
-                               phi=phi, minibatch_size=minibatch_size,
-                               target_update_method='hard',
-                               soft_update_tau=1e-2,
-                               episodic_update=False,
-                               gpu=args.gpu,  # 设置是否使用gpu
-                               episodic_update_len=16)
+        agent = double_dqn.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
+                                     explorer=explorer, replay_start_size=replay_start_size,
+                                     target_update_interval=10,  # target q网络多久和q网络同步
+                                     update_interval=update_interval,
+                                     phi=phi, minibatch_size=minibatch_size,
+                                     target_update_method='hard',
+                                     soft_update_tau=1e-2,
+                                     episodic_update=False,
+                                     gpu=args.gpu,  # 设置是否使用gpu
+                                     episodic_update_len=16)
         return agent
 
     def train():
-        env = Env.MyEnv(feature_number, feature_max_count, data, classifier)
+        env = Env.MyEnv(feature_number,
+                        feature_max_count,
+                        utils.get_classifier(),
+                        CLASSIFIER_POOL['RandomForest'])
         agent = create_agent(env)
         train_agent(env, agent)
 

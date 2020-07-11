@@ -14,9 +14,13 @@ service = ['aol', 'auth', 'bgp', 'courier', 'csnet_ns', 'ctf', 'daytime', 'disca
            'urp_i', 'uucp', 'uucp_path', 'vmnet', 'whois', 'X11', 'Z39_50']
 flag = ['OTH', 'REJ', 'RSTO', 'RSTOS0', 'RSTR', 'S0', 'S1', 'S2', 'S3', 'SF', 'SH']
 
-data_path = 'dataset/original_csv_format/KDDTest-21.csv'
-save_path = 'dataset/preprocessed/KDDTest-21.csv'
+data_path = 'dataset/preprocessed/KDDTrain+.csv'
+result_path = 'result/'
 
+def get_classifier():
+    data, label = load_data(data_path)
+    processed_data = data_preprocessing(data)
+    return Classifier(processed_data, label)
 
 # 读取csv,针对两种不同的csv文件
 def load_csv(path, original=False):
