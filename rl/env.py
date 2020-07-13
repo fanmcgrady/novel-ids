@@ -22,6 +22,8 @@ class MyEnv:
         while True:
             action = random.randint(0, self.action_size - 1)
             if action in self.state_index:
+                continue
+            else:
                 break
         return action
 
@@ -52,9 +54,11 @@ class MyEnv:
         if reward == -1:
             reward = self.classifier.classify(self.method, self.state_index)
             # reward是字典
-            result = 0
-            for element in reward.values():
-                result += 0.2*element
+            # result = 0
+            # for element in reward.values():
+            #     result += 0.2*element
+
+            result = reward['Accuracy']
             self.add_dict(result)
 
             reward = result
@@ -62,7 +66,7 @@ class MyEnv:
         return reward
 
     def add_dict(self, reward):
-        temp = [str(x) for x in self.state]
+        temp = [str(x) for x in self.state_index]
         temp = '.'.join(temp)
         self.reward_dict[temp] = reward
 

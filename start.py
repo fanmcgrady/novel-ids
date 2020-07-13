@@ -9,13 +9,13 @@ from chainer import optimizers
 from chainerrl import replay_buffer, explorers
 from chainerrl.action_value import DiscreteActionValue
 from chainerrl.agents import double_dqn
+from chainerrl.replay_buffers import prioritized
 
 import utils
 from rl import env as Env
 from rl.classifier import CLASSIFIER_POOL
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--result-file', type=str, default='result.txt')
 parser.add_argument('--max-feature', type=int, default=10)
 parser.add_argument('--gpu', type=int, default=-1)
 args = parser.parse_args()
@@ -26,6 +26,7 @@ feature_max_count = args.max_feature  # 选取的特征数目大于该值时，r
 MAX_EPISODE = 1000
 net_layers = [64, 32]
 
+result_file = 'result/result-{}.txt'.format(time.strftime('%Y%m%d%H%M'))
 
 # 每一轮逻辑如下
 # 1. 初始化环境，定义S和A两个list，用来保存过程中的state和action。进入循环，直到当前这一轮完成（done == True）
@@ -95,7 +96,7 @@ def main():
                         if state[i] == 1:
                             state_human.append(i + 1)
                     print("reward = {}, state = {}, state count = {}".format(reward, state_human, len(state_human)))
-                    with open(args.result_file, 'a') as f:
+                    with open(result_file, 'a') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
                             "evaluate episode:{}, reward = {}, state count = {}, state = {}\n"
@@ -122,22 +123,19 @@ def main():
             terminal = False
             reward = 0
             while not terminal:
-                action, q, ga = agent.act_and_train(
+                action = agent.act_and_train(
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
-                action = int(action)
+                # action = int(action)
                 state, reward, terminal = env.step(action)
-                print("episode:{}, action:{}, greedy action:{}, reward = {}".format(episode, action, ga, reward))
+                print("episode:{}, action:{}, reward = {}".format(episode, action, reward))
 
                 if terminal:
-                    state_human = []
-                    for i in range(len(state)):
-                        if state[i] == 1:
-                            state_human.append(i + 1)
-                    with open(args.result_file, 'a') as f:
+
+                    with open(result_file, 'a') as f:
                         f.write("train episode:{}, reward = {}, state count = {}, state = {}\n"
-                                .format(episode, reward, len(state_human), state_human))
+                                .format(episode, reward, len(state), state))
                         print(" episode:{}, reward = {}, state count = {}, state:{}".format(
-                            episode, reward, len(state_human), state_human))
+                            episode, reward, len(state), state))
 
                         agent.stop_episode()
                         episode_reward.append(reward)
@@ -146,7 +144,7 @@ def main():
 
     def create_agent(env):
         state_size = env.state_size
-        action_size = env.state_size
+        action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 
         start_epsilon = 1.
@@ -159,25 +157,28 @@ def main():
         opt = optimizers.Adam()
         opt.setup(q_func)
 
-        rbuf_capacity = 5 * 10 ** 3
+        # rbuf_capacity = 5 * 10 ** 3
         minibatch_size = 16
 
-        steps = 1000
+        # steps = 1000
         replay_start_size = 20
         update_interval = 10
-        betasteps = (steps - replay_start_size) // update_interval
-        rbuf = replay_buffer.PrioritizedReplayBuffer(rbuf_capacity, betasteps=betasteps)
+        # betasteps = (steps - replay_start_size) // update_interval
+        # rbuf = replay_buffer.PrioritizedReplayBuffer(rbuf_capacity, betasteps=betasteps)
+        rbuf = prioritized.PrioritizedReplayBuffer()
 
         phi = lambda x: x.astype(np.float32, copy=False)
 
-        agent = double_dqn.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
-                                     explorer=explorer, replay_start_size=replay_start_size,
+        agent = double_dqn.DoubleDQN(q_func,
+                                     opt,
+                                     rbuf,
+                                     gamma=0.99,
+                                     explorer=explorer,
+                                     replay_start_size=replay_start_size,
                                      target_update_interval=10,  # target q网络多久和q网络同步
                                      update_interval=update_interval,
-                                     phi=phi, minibatch_size=minibatch_size,
-                                     target_update_method='hard',
-                                     soft_update_tau=1e-2,
-                                     # episodic_update=False,
+                                     phi=phi,
+                                     minibatch_size=minibatch_size,
                                      gpu=args.gpu,  # 设置是否使用gpu
                                      episodic_update_len=16)
         return agent
@@ -204,7 +205,7 @@ def main():
     average_reward = average_reward / len(episode_reward)
 
     # 写入文件的最后一行
-    with open(args.result_file, 'a') as f:
+    with open(result_file, 'a') as f:
         f.write(
             "The max reward of this train:{}, the average reward of this train:{}"
                 .format(max_reward, average_reward))
@@ -216,5 +217,5 @@ if __name__ == '__main__':
     elapsed = time.time() - start_time
     print("elapsed: {}".format(elapsed))
     # 训练时间
-    with open(args.result_file, 'a') as f:
+    with open(result_file, 'a') as f:
         f.write("Training elapsed:{} seconds".format(elapsed))
