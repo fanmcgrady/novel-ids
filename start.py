@@ -85,23 +85,19 @@ def main():
             state = env.reset()
             terminal = False
             while not terminal:
-                action, q = agent.act(state)
+                action = agent.act(state)
                 state, terminal, reward = env.step(action)
 
-                print("action = {}".format(action, q))
+                print("action = {}".format(action))
 
                 if terminal:
-                    state_human = []
-                    for i in range(len(state)):
-                        if state[i] == 1:
-                            state_human.append(i + 1)
-                    print("reward = {}, state = {}, state count = {}".format(reward, state_human, len(state_human)))
+                    print("reward = {}, state = {}, state count = {}".format(reward, state, len(state)))
                     with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
                             "evaluate episode:{}, reward = {}, state count = {}, state = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, len(state_human), state_human)
+                                .format(current, reward, len(state), state)
                         )
 
     # 开始训练
