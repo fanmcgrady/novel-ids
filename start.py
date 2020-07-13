@@ -96,7 +96,7 @@ def main():
                         if state[i] == 1:
                             state_human.append(i + 1)
                     print("reward = {}, state = {}, state count = {}".format(reward, state_human, len(state_human)))
-                    with open(result_file, 'a') as f:
+                    with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
                             "evaluate episode:{}, reward = {}, state count = {}, state = {}\n"
@@ -131,7 +131,7 @@ def main():
 
                 if terminal:
 
-                    with open(result_file, 'a') as f:
+                    with open(result_file, 'a+') as f:
                         f.write("train episode:{}, reward = {}, state count = {}, state = {}\n"
                                 .format(episode, reward, len(state), state))
                         print(" episode:{}, reward = {}, state count = {}, state:{}".format(
@@ -205,7 +205,7 @@ def main():
     average_reward = average_reward / len(episode_reward)
 
     # 写入文件的最后一行
-    with open(result_file, 'a') as f:
+    with open(result_file, 'a+') as f:
         f.write(
             "The max reward of this train:{}, the average reward of this train:{}"
                 .format(max_reward, average_reward))
@@ -217,5 +217,5 @@ if __name__ == '__main__':
     elapsed = time.time() - start_time
     print("elapsed: {}".format(elapsed))
     # 训练时间
-    with open(result_file, 'a') as f:
+    with open(result_file, 'a+') as f:
         f.write("Training elapsed:{} seconds".format(elapsed))
