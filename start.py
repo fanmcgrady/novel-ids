@@ -18,6 +18,7 @@ from rl.classifier import CLASSIFIER_POOL
 parser = argparse.ArgumentParser()
 parser.add_argument('--max-feature', type=int, default=10)
 parser.add_argument('--gpu', type=int, default=-1)
+parser.add_argument('--cls', type=str, default='RandomForest')
 args = parser.parse_args()
 
 # 可变参数
@@ -183,7 +184,7 @@ def main():
         env = Env.MyEnv(feature_number,
                         feature_max_count,
                         utils.get_classifier(),
-                        CLASSIFIER_POOL['RandomForest'])
+                        CLASSIFIER_POOL[args.cls])
         agent = create_agent(env)
         train_agent(env, agent)
 
