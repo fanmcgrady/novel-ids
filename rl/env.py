@@ -28,7 +28,7 @@ class MyEnv:
         return action
 
     def step(self, action_index):
-        self.state_index.append(action_index)
+        self.state_index.add(action_index)
         if len(self.state_index) == self.max:  # 已经到达选择数量上线
             self.done = True
 
