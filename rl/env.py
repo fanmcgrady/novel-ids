@@ -1,8 +1,7 @@
-from rl import classifier as cls
+import random
+
 import numpy as np
 
-import random
-from utils import load_data,data_preprocessing
 
 # action space 中的最后一个动作为终止
 
@@ -15,6 +14,7 @@ class MyEnv:
         self.classifier = classifier
         self.method = method
         self.reward_dict = {}
+        self.pre_accuracy = 0
 
         self.reset()
 
@@ -49,26 +49,35 @@ class MyEnv:
     def get_reward(self):
         temp = [str(x) for x in self.state_index]
         temp = '.'.join(temp)
-        reward = self.reward_dict.get(temp, -1)
-
-        if reward == -1:
+        if temp in self.reward_dict.keys():
+            item = self.reward_dict.get(temp)
+            self.pre_accuracy = item[1]
+            return item[0]
+        else:
             reward = self.classifier.classify(self.method, self.state_index)
             # reward是字典
             # result = 0
             # for element in reward.values():
             #     result += 0.2*element
 
-            result = reward['Accuracy']
-            self.add_dict(result)
+            accuracy = reward['Accuracy']
+            result = -1
+            # 越选指标越小的情况
+            if self.pre_accuracy > accuracy:
+                result = -1
+            # 选对的情况
+            else:
+                result = accuracy
 
-            reward = result
+            self.add_dict(result, accuracy)
+            self.pre_accuracy = accuracy
 
-        return reward
+            return result
 
-    def add_dict(self, reward):
+    def add_dict(self, reward, accuracy):
         temp = [str(x) for x in self.state_index]
         temp = '.'.join(temp)
-        self.reward_dict[temp] = reward
+        self.reward_dict[temp] = [reward, accuracy]
 
     def get_one_hot(self):
         return np.array([1 if i in self.state_index else 0 for i in range(self.state_size)])

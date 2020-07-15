@@ -85,20 +85,24 @@ def main():
             print("evaluate episode: {}".format(current))
             state = env.reset()
             terminal = False
+            action_list = []
             while not terminal:
                 action = agent.act(state)
-                state, terminal, reward = env.step(action)
-
-                print("action = {}".format(action))
-
+                action_list.append(action)
+                state, reward, terminal = env.step(action)
                 if terminal:
-                    print("reward = {}, state = {}, state count = {}".format(reward, state, len(state)))
                     with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
-                            "evaluate episode:{}, reward = {}, state count = {}, state = {}\n"
+                            "evaluate episode:{}, reward = {}, action = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, len(state), state)
+                                .format(current, reward, action_list)
+                        )
+                        print(
+                            "--------------------------------------------------------------------------------------------------\n"
+                            "evaluate episode:{}, reward = {}, action = {}\n"
+                            "-------------------------------------------------------------------------------------------------\n"
+                                .format(current, reward, action_list)
                         )
 
     # 开始训练
@@ -119,20 +123,22 @@ def main():
             state = env.reset()
             terminal = False
             reward = 0
+            t = 0
+            action_list = []
             while not terminal:
+                t += 1
                 action = agent.act_and_train(
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
-                # action = int(action)
+                action_list.append(action)
                 state, reward, terminal = env.step(action)
-                print("episode:{}, action:{}, reward = {}".format(episode, action, reward))
+                print("episode:{}, t:{}, action:{}, reward = {}".format(episode, t, action_list, reward))
 
                 if terminal:
-
                     with open(result_file, 'a+') as f:
-                        f.write("train episode:{}, reward = {}, state count = {}, state = {}\n"
-                                .format(episode, reward, len(state), state))
-                        print(" episode:{}, reward = {}, state count = {}, state:{}".format(
-                            episode, reward, len(state), state))
+                        f.write("train episode:{}, reward = {}, action = {}\n"
+                                .format(episode, reward, action_list))
+                        print("train episode:{}, reward = {}, action = {}\n"
+                                .format(episode, reward, action_list))
 
                         agent.stop_episode()
                         episode_reward.append(reward)
