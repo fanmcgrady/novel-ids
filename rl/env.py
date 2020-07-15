@@ -43,7 +43,7 @@ class MyEnv:
 
     def reset(self):
         self.done = False
-        self.state_index = []
+        self.state_index = set()
         return self.get_one_hot()
 
     def get_reward(self):
