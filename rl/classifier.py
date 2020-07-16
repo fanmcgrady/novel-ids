@@ -43,7 +43,8 @@ class Classifier():
         if feature == None:
             x = self.data
         else:
-            # 把对应的特征取出来
+            # 把对应的特征取出来，可能会有重复
+            feature = set(feature)
             for data_row in self.data:
                 new_data_row = []
                 for i in feature:
