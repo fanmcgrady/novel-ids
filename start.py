@@ -16,7 +16,7 @@ from rl import env as Env
 from rl.classifier import CLASSIFIER_POOL
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--max-feature', type=int, default=5)
+parser.add_argument('--max-feature', type=int, default=10)
 parser.add_argument('--gpu', type=int, default=-1)
 parser.add_argument('--cls', type=str, default='RandomForest')
 args = parser.parse_args()
