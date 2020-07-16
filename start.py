@@ -86,12 +86,14 @@ def main():
             state = env.reset()
             terminal = False
             action_list = []
+
             while not terminal:
                 action = agent.act(state)
                 print("action={}".format(action))
                 action_list.append(action)
                 state, reward, terminal = env.step(action)
-                if terminal:
+
+                if terminal or len(action_list) > 20:
                     with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
