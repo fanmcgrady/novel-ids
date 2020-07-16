@@ -88,6 +88,7 @@ def main():
             action_list = []
             while not terminal:
                 action = agent.act(state)
+                print("action={}".format(action))
                 action_list.append(action)
                 state, reward, terminal = env.step(action)
                 if terminal:

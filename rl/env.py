@@ -14,7 +14,6 @@ class MyEnv:
         self.classifier = classifier
         self.method = method
         self.reward_dict = {}
-        self.pre_accuracy = 0
 
         self.reset()
 
@@ -44,6 +43,8 @@ class MyEnv:
     def reset(self):
         self.done = False
         self.state_index = set()
+        self.pre_accuracy = 0
+
         return self.get_one_hot()
 
     def get_reward(self):
