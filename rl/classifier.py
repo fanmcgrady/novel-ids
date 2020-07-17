@@ -49,8 +49,6 @@ class Classifier():
                 new_data_row = []
                 for i in feature:
                     new_data_row.append(data_row[i])
-                # print(len(new_data_row))
-                # print(new_data_row)
                 x.append(new_data_row)
 
         # 划分训练集、测试集
