@@ -8,6 +8,8 @@ import numpy as np
 from chainer import optimizers
 from chainerrl import replay_buffer, explorers
 from chainerrl.action_value import DiscreteActionValue
+import rl.action_value as ActionValue
+from rl.agent import MyDoubleDQN
 from chainerrl.agents import double_dqn
 from chainerrl.replay_buffers import prioritized
 
@@ -25,7 +27,7 @@ args = parser.parse_args()
 feature_number = 41  # 特征总数量
 feature_max_count = args.max_feature  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000
-net_layers = [64, 32]
+net_layers = [32, 16]
 
 result_file = 'result/result-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'))
 
@@ -78,7 +80,7 @@ def main():
                 else:
                     x = f(x)
 
-            return DiscreteActionValue(x)
+            return ActionValue.DiscreteActionValue(x)
 
     def evaluate(env, agent, current):
         for i in range(1):
@@ -171,25 +173,41 @@ def main():
 
         # steps = 1000
         replay_start_size = 20
-        update_interval = 10
+        update_interval = 5
         # betasteps = (steps - replay_start_size) // update_interval
         # rbuf = replay_buffer.PrioritizedReplayBuffer(rbuf_capacity, betasteps=betasteps)
         rbuf = prioritized.PrioritizedReplayBuffer()
 
         phi = lambda x: x.astype(np.float32, copy=False)
 
-        agent = double_dqn.DoubleDQN(q_func,
-                                     opt,
-                                     rbuf,
-                                     gamma=0.99,
-                                     explorer=explorer,
-                                     replay_start_size=replay_start_size,
-                                     target_update_interval=10,  # target q网络多久和q网络同步
-                                     update_interval=update_interval,
-                                     phi=phi,
-                                     minibatch_size=minibatch_size,
-                                     gpu=args.gpu,  # 设置是否使用gpu
-                                     episodic_update_len=16)
+        # agent = double_dqn.DoubleDQN(q_func,
+        #                              opt,
+        #                              rbuf,
+        #                              gamma=0.99,
+        #                              explorer=explorer,
+        #                              replay_start_size=replay_start_size,
+        #                              target_update_interval=10,  # target q网络多久和q网络同步
+        #                              update_interval=update_interval,
+        #                              phi=phi,
+        #                              minibatch_size=minibatch_size,
+        #                              gpu=args.gpu,  # 设置是否使用gpu
+        #                              episodic_update_len=16)
+
+
+        # 自己的DDQN
+        agent = MyDoubleDQN(q_func,
+                            opt,
+                            rbuf,
+                            gamma=0.99,
+                            explorer=explorer,
+                            replay_start_size=replay_start_size,
+                            target_update_interval=10,  # target q网络多久和q网络同步
+                            update_interval=update_interval,
+                            phi=phi,
+                            minibatch_size=minibatch_size,
+                            gpu=args.gpu,  # 设置是否使用gpu
+                            episodic_update_len=16)
+
         return agent
 
     def train():
