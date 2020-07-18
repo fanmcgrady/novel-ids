@@ -28,7 +28,6 @@ class DiscreteActionValue(ActionValue):
         assert isinstance(q_values, chainer.Variable)
         # self.xp = cuda.get_array_module(q_values.data)
         self.q_values = q_values
-        print("Q value {}".format(self.q_values))
         self.n_actions = q_values.data.shape[1]
         self.q_values_formatter = q_values_formatter
 
@@ -39,7 +38,6 @@ class DiscreteActionValue(ActionValue):
 
     @cached_property
     def greedy_actions_with_state(self):
-        print("Enter greedy action with state!")
         data = self.q_values.data.astype(np.float)
         # print("data: ", data, len(data))
         # print("state: ", self.state, len(self.state))
