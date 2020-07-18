@@ -149,8 +149,8 @@ def main():
 
                         agent.stop_episode()
                         episode_reward.append(reward)
-                        if (episode + 1) % 2 == 0 and episode != 0:
-                            evaluate(env, agent, (episode + 1) / 2)
+                        if (episode + 1) % 10 == 0 and episode != 0:
+                            evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
         state_size = env.state_size
