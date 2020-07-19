@@ -29,7 +29,7 @@ feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward�
 MAX_EPISODE = 1000
 net_layers = [64,32]
 
-result_file = 'result/result-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'))
+result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'),args.maxf)
 
 # 每一轮逻辑如下
 # 1. 初始化环境，定义S和A两个list，用来保存过程中的state和action。进入循环，直到当前这一轮完成（done == True）
