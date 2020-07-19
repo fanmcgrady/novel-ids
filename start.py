@@ -91,11 +91,12 @@ def main():
 
             while not terminal:
                 action = agent.act(state)
-                action_list.append(action)
+                if action not in action_list:
+                    action_list.append(action)
                 state, reward, terminal = env.step(action)
 
-                if terminal or len(action_list) > 20:
-                    if len(action_list) > 20:
+                if terminal or len(action_list) > 10:
+                    if len(action_list) > 10:
                         terminal = True
 
                     with open(result_file, 'a+') as f:
@@ -136,7 +137,8 @@ def main():
                 t += 1
                 action = agent.act_and_train(
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
-                action_list.append(action)
+                if action not in action_list:
+                    action_list.append(action)
                 state, reward, terminal = env.step(action)
                 print("episode:{}, t:{}, action:{}, reward = {}".format(episode, t, action_list, reward))
 
