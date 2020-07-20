@@ -71,9 +71,12 @@ def data_preprocessing(data):
 
     # Min-Max数据
     min_max_scaler = preprocessing.MinMaxScaler()
-    preprocessed_data = min_max_scaler.fit_transform(data)
+    # temp_data = min_max_scaler.fit_transform(data)
+    # 正则化数据,这个效果回比上面Min-Max好一些
+    preprocessed_data = preprocessing.normalize(data, norm='l2')
 
     return preprocessed_data
+    # return preprocessed_data
 
 def load_data(path):
 

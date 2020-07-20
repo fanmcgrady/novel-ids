@@ -7,10 +7,10 @@ result_path = 'result/'
 
 # 使用全部特征
 def full_feature(data_path):
-    processed_data, label = load_minmax(data_path)
+    processed_data, label = load_normalize_data(data_path)
     classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
-    for key in CLASSIFIER_POOL_TEST.keys():
+    for key in CLASSIFIER_POOL.keys():
         result = classifier.classify(CLASSIFIER_POOL.get(key))
         result_file = save_result(result, result_path, date, 'Full_feature', key)
     print('Training complete! The result was saved to '+result_path+result_file)
@@ -23,7 +23,7 @@ with Machine Learning Algorithms
 MLP获得
 '''
 def Staudemeyer_method(data_path):
-    processed_data, label = load_minmax(data_path)
+    processed_data, label = load_normalize_data(data_path)
     classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
     feature = [0, 1, 2, 4, 5, 7, 24, 32, 34, 39]
@@ -33,7 +33,7 @@ def Staudemeyer_method(data_path):
     print('Training complete! The result was saved to ' + result_path + result_file)
 
 # 读取数据并且范化数据
-def load_minmax(path):
+def load_normalize_data(path):
 
     data, label = load_data(path)
     processed_data = data_preprocessing(data)
@@ -63,6 +63,6 @@ def save_result(result, result_path, date, compare_object, method):
 
 if __name__ == '__main__':
     # 使用全部特征的
-    # full_feature(data_path=data_path)
-    Staudemeyer_method(data_path=data_path)
+    full_feature(data_path=data_path)
+    # Staudemeyer_method(data_path=data_path)
     # pass
