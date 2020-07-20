@@ -14,6 +14,7 @@ class MyEnv:
         self.classifier = classifier
         self.method = method
         self.reward_dict = {}
+        self.average = self._average_training_data()
 
         self.reset()
 
@@ -81,4 +82,20 @@ class MyEnv:
         self.reward_dict[temp] = [reward, accuracy]
 
     def get_one_hot(self):
-        return np.array([1 if i in self.state_index else 0 for i in range(self.state_size)])
+        # 选了哪些特征的index
+        one_hot_state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
+
+        state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
+
+        print(state)
+        return np.array(state)
+        # return np.array(one_hot_state)
+
+    def _average_training_data(self):
+        data = self.classifier.data
+        average = [0 for _ in range(41)]
+        for line in data:
+            for i in range(len(line)):
+                average[i] += line[i]
+
+        return [item / len(data) for item in average]

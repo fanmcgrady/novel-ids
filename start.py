@@ -20,7 +20,8 @@ from rl.classifier import CLASSIFIER_POOL
 parser = argparse.ArgumentParser()
 parser.add_argument('--maxf', type=int, default=10)
 parser.add_argument('--gpu', type=int, default=-1)
-parser.add_argument('--cls', type=str, default='RandomForest')
+parser.add_argument('--cls', type=str, default='DT')
+# parser.add_argument('--cls', type=str, default='RandomForest')
 args = parser.parse_args()
 
 # 可变参数
@@ -159,9 +160,9 @@ def main():
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 
-        start_epsilon = 1.
-        end_epsilon = 0.3
-        decay_steps = 20
+        start_epsilon = 0.5
+        end_epsilon = 0.1
+        decay_steps = 5
         explorer = explorers.LinearDecayEpsilonGreedy(
             start_epsilon, end_epsilon, decay_steps,
             env.random_action)

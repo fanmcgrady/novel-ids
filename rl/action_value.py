@@ -45,7 +45,8 @@ class DiscreteActionValue(ActionValue):
             action = np.argmax(data, axis=1)[0]
             # print("action:", action)
             # 设置规则降低q_value，防止盯着一个动作选，降低10000即可。(前面降低了1，还是有点问题，变成10000试试)
-            if action != len(self.state) and self.state[0][action] == 1:
+            if self.state[0][action] > 0:
+
                 # print("Action chosen: {}, Data : {}, Reset Q value!!!!!!!!!!".format(action, data))
                 # data[0][action] /= 2
                 data[0][action] = -10000
