@@ -167,7 +167,7 @@ def main():
                             evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
-        state_size = env.state_size + 8
+        state_size = env.state_size + 7
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 
