@@ -25,10 +25,11 @@ parser.add_argument('--cls', type=str, default='DT')
 args = parser.parse_args()
 
 # 可变参数
-feature_number = 41  # 特征总数量
+state_size = 41 # 可观察的状态数
+action_size = 41  # 可选的特征数
 feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
-MAX_EPISODE = 1000
-net_layers = [64,32]
+MAX_EPISODE = 1000 #
+net_layers = [64,32] # 一个包含两个隐藏层的神经网络
 
 result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'),args.maxf)
 
@@ -42,7 +43,12 @@ result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%
 # 用这个逻辑替代原来的my_train的逻辑，只需要把agent加入即可，agent应该是不需要修改的
 
 def main():
+    # 保存训练中每一轮的回报
     episode_reward = []
+    # 保存训练中每一轮的分类准确率
+    episode_accuracy = []
+    # 用来保存效果最优的特征集合
+    feature_list = []
 
     class QFunction(chainer.Chain):
         def __init__(self, obs_size, n_actions, n_hidden_channels=None):
@@ -94,7 +100,7 @@ def main():
                 action = agent.act(state)
                 if action not in action_list:
                     action_list.append(action)
-                state, reward, terminal = env.step(action)
+                state, reward, classify_result, terminal = env.step(action)
 
                 if terminal or len(action_list) > 10:
                     if len(action_list) > 10:
@@ -103,15 +109,15 @@ def main():
                     with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
-                            "evaluate episode:{}, reward = {}, action = {}\n"
+                            "evaluate episode:{}, reward = {}, accuracy = {}, action = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, action_list)
+                                .format(current, reward, classify_result, action_list)
                         )
                         print(
                             "--------------------------------------------------------------------------------------------------\n"
-                            "evaluate episode:{}, reward = {}, action = {}\n"
+                            "evaluate episode:{}, reward = {}, accuracy = {},action = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, action_list)
+                                .format(current, reward, classify_result, action_list)
                         )
 
     # 开始训练
@@ -140,23 +146,28 @@ def main():
                     state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
                 if action not in action_list:
                     action_list.append(action)
-                state, reward, terminal = env.step(action)
-                print("episode:{}, t:{}, action:{}, reward = {}".format(episode, t, action_list, reward))
+                state, reward, classify_result, terminal = env.step(action)
+                print("episode:{}, t:{}, action:{}, accuracy = {} reward = {}".format(episode, t, action_list, classify_result, reward))
 
                 if terminal:
                     with open(result_file, 'a+') as f:
-                        f.write("train episode:{}, reward = {}, action = {}\n"
-                                .format(episode, reward, action_list))
-                        print("train episode:{}, reward = {}, action = {}\n"
-                                .format(episode, reward, action_list))
+                        f.write("train episode:{}, reward = {}, accuracy = {}, action = {}\n"
+                                .format(episode, reward , classify_result, action_list))
+                        print("train episode:{}, reward = {}, accuracy = {},action = {}\n"
+                                .format(episode, reward, classify_result, action_list))
 
                         agent.stop_episode()
+                        # 加入轮次训练的回报,后面可能需要
                         episode_reward.append(reward)
+                        # 加入本轮次训练的准确率
+                        episode_accuracy.append(classify_result)
+                        # 本轮次对应所选的特征
+                        feature_list.append(action_list)
                         if (episode + 1) % 10 == 0 and episode != 0:
                             evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
-        state_size = env.state_size
+        state_size = env.state_size + 8
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 
@@ -213,7 +224,7 @@ def main():
         return agent
 
     def train():
-        env = Env.MyEnv(feature_number,
+        env = Env.MyEnv(state_size, action_size,
                         feature_max_count,
                         utils.get_classifier(),
                         CLASSIFIER_POOL[args.cls])
@@ -226,18 +237,21 @@ def main():
 
     train()
 
-    # 用于计算本次训练中最大的准确率以及平均准确率
-    max_reward = max(episode_reward)
-    average_reward = 0
-    for i in range(len(episode_reward) - 1):
-        average_reward = average_reward + episode_reward[i]
-    average_reward = average_reward / len(episode_reward)
+    # 用于计算本次训练中最大的准确率,及所选的特征以及训练过程中的平均准确率
+    max_accuracy = max(episode_accuracy)
+    max_index = episode_reward.index(max_accuracy)
+    best_feature = feature_list[max_index]
+
+    average_accuracy = 0
+    for i in range(len(episode_accuracy) - 1):
+        average_accuracy = average_accuracy + episode_accuracy[i]
+    average_accuracy = average_accuracy / len(episode_accuracy)
 
     # 写入文件的最后一行
     with open(result_file, 'a+') as f:
         f.write(
-            "The max reward of this train:{}, the average reward of this train:{}"
-                .format(max_reward, average_reward))
+            "The max reward of this train:{}, the feature selected are:{}, the average reward of this train:{}"
+                .format(max_accuracy, best_feature, average_accuracy))
 
 
 if __name__ == '__main__':

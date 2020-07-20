@@ -1,4 +1,4 @@
-from rl.classifier import Classifier,CLASSIFIER_POOL
+from rl.classifier import Classifier,CLASSIFIER_POOL,CLASSIFIER_POOL_TEST
 from utils import load_data,data_preprocessing
 import time
 
@@ -10,7 +10,7 @@ def full_feature(data_path):
     processed_data, label = load_minmax(data_path)
     classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
-    for key in CLASSIFIER_POOL.keys():
+    for key in CLASSIFIER_POOL_TEST.keys():
         result = classifier.classify(CLASSIFIER_POOL.get(key))
         result_file = save_result(result, result_path, date, 'Full_feature', key)
     print('Training complete! The result was saved to '+result_path+result_file)
@@ -50,6 +50,8 @@ def save_result(result, result_path, date, compare_object, method):
         f.write('Precision : {}\n'.format(result['Precision']))
         f.write('Recall : {}\n'.format(result['Recall']))
         f.write('F1 Score : {}\n'.format(result['F1 Score']))
+        f.write('False Alarm Rate : {}\n'.format(result['False Alarm Rate']))
+        f.write('Miss Alarm Rate : {}\n'.format(result['Miss Alarm Rate']))
         f.write('Train Time : {}\n'.format(result['Train Time']))
         f.write('Test Time For Per Sample : {}\n'.format(result['Test Time For Per Sample']))
         f.write('-------------Saved time: '+time.strftime('%Y/%m/%d/%H:%M:%S')+'----------------\n')
@@ -61,6 +63,6 @@ def save_result(result, result_path, date, compare_object, method):
 
 if __name__ == '__main__':
     # 使用全部特征的
-    full_feature(data_path=data_path)
-    # Staudemeyer_method(data_path=data_path)
+    # full_feature(data_path=data_path)
+    Staudemeyer_method(data_path=data_path)
     # pass

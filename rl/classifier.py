@@ -27,6 +27,8 @@ CLASSIFIER_POOL = {
                                      max_depth=1, random_state=0)
 }
 
+CLASSIFIER_POOL_TEST = {'DT': DecisionTreeClassifier()}
+
 class Classifier():
     def __init__(self, data, label):
         self.data = data
@@ -87,17 +89,34 @@ class Classifier():
         test_end = time.time()
         test_time = test_end - test_start
 
+        # 获取混淆矩阵，得到各个指标
+        cm = metrics.confusion_matrix(y_test, y_predict)
+        TP = cm[0][0]
+        FP = cm[0][1]
+        FN = cm[1][0]
+        TN = cm[1][1]
+        # print('TP : {}, FP : {}, FN : {}, TN :{}'.format(TP, FP, FN, TN))
 
         accuracy = metrics.accuracy_score(y_test, y_predict)
         precision = metrics.precision_score(y_test, y_predict, pos_label='1', average='binary')
         recall = metrics.recall_score(y_test, y_predict, pos_label='1', average='binary')
         f1_score = metrics.f1_score(y_test, y_predict, pos_label='1', average='binary')
+        # 误警率
+        false_alarm_rate = FP / (FP + TN)
+        # 漏警率
+        miss_alarm_rate = FN / (TP + FN)
+        # print('FAR: {}'.format(false_Alarm_Rate))
+        # print('MAR: {}'.format(miss_ALarm_Rate))
+
         result['Accuracy'] = accuracy
         result['Precision'] = precision
         result['Recall'] = recall
         result['F1 Score'] = f1_score
+        result['False Alarm Rate'] = false_alarm_rate
+        result['Miss Alarm Rate'] = miss_alarm_rate
         result['Train Time'] = train_time
         result['Test Time For Per Sample'] = test_time/sample_number
+
 
         #
         # false_positive_rate, true_positive_rate, thresholds = metrics.roc_curve(y_test,y_predict)
