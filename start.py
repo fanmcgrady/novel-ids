@@ -25,7 +25,7 @@ parser.add_argument('--cls', type=str, default='DT')
 args = parser.parse_args()
 
 # 可变参数
-state_size = 41 # 可观察的状态数
+state_size = 10 # 可观察的状态数
 action_size = 41  # 可选的特征数
 feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000 #
