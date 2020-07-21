@@ -29,7 +29,7 @@ state_size = 41 # 可观察的状态数
 action_size = 41  # 可选的特征数
 feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000 #
-net_layers = [64,32] # 一个包含两个隐藏层的神经网络
+net_layers = [64, 32] # 一个包含两个隐藏层的神经网络
 
 result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'),args.maxf)
 
@@ -59,7 +59,7 @@ def main():
             inpdim = obs_size
             for i, n_hid in enumerate(n_hidden_channels):
                 net += [('l{}'.format(i), L.Linear(inpdim, n_hid))]
-                # net += [('norm{}'.format(i), L.BatchNormalization(n_hid))]
+                net += [('norm{}'.format(i), L.BatchNormalization(n_hid))]
                 net += [('_act{}'.format(i), F.relu)]
                 net += [('_dropout{}'.format(i), F.dropout)]
                 inpdim = n_hid
@@ -167,7 +167,7 @@ def main():
                             evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
-        state_size = env.state_size + 7
+        state_size = env.state_size + 8
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 

@@ -84,9 +84,9 @@ class MyEnv:
 
     def get_one_hot(self, current_result):
         # 选了哪些特征的index
-        # one_hot_state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
-        state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
-        # state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
+        one_hot_state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
+        # state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
+        state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
         count = len(self.state_index)
         accuracy = current_result.get('Accuracy', 0)
         precision = current_result.get('Precision', 0)
@@ -103,7 +103,7 @@ class MyEnv:
         state.append(f1_score/100)
         state.append(false_alarm_rate)
         state.append(miss_alarm_rate)
-        # state.append(time_per_sample)
+        state.append(time_per_sample)
 
         return np.array(state)
         # return np.array(one_hot_state)
