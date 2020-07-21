@@ -22,7 +22,7 @@ CLASSIFIER_POOL = {
     'Ada': AdaBoostClassifier(n_estimators=100),
     'BAGGING': BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5),
     # SVM训练太慢，原因是一直没收敛，需要调一下参数
-    'SVM': SVC(kernel='rbf', probability=True, gamma='auto', max_iter=1000),
+    'SVM': SVC(kernel='rbf', probability=True, gamma='auto', max_iter=3000),
     'GBDT': GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,
                                      max_depth=1, random_state=0)
 }

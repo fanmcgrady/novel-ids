@@ -4,4 +4,4 @@ venv/
 *.pyc
 *.pkl
 result.txt
-result/
+

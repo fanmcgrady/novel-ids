@@ -44,11 +44,13 @@ result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%
 
 def main():
     # 保存训练中每一轮的回报
-    episode_reward = []
+    train_reward = []
     # 保存训练中每一轮的分类准确率
-    episode_accuracy = []
+    train_accuracy = []
     # 用来保存效果最优的特征集合
-    feature_list = []
+    evaluate_accuracy = []
+    feature_list_train = []
+    feature_list_evaluate = []
 
     class QFunction(chainer.Chain):
         def __init__(self, obs_size, n_actions, n_hidden_channels=None):
@@ -119,6 +121,10 @@ def main():
                             "-------------------------------------------------------------------------------------------------\n"
                                 .format(current, reward, classify_result, action_list)
                         )
+                    # 每次评估添加本次评估准确率
+                    evaluate_accuracy.append(classify_result)
+                    # 同时添加对应特征
+                    feature_list_evaluate.append(action_list)
 
     # 开始训练
     # def train_agent(env, agent):
@@ -158,11 +164,11 @@ def main():
 
                         agent.stop_episode()
                         # 加入轮次训练的回报,后面可能需要
-                        episode_reward.append(reward)
+                        train_reward.append(reward)
                         # 加入本轮次训练的准确率
-                        episode_accuracy.append(classify_result)
+                        train_accuracy.append(classify_result)
                         # 本轮次对应所选的特征
-                        feature_list.append(action_list)
+                        feature_list_train.append(action_list)
                         if (episode + 1) % 10 == 0 and episode != 0:
                             evaluate(env, agent, (episode + 1) / 10)
 
@@ -171,9 +177,9 @@ def main():
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 
-        start_epsilon = 0.5
-        end_epsilon = 0.1
-        decay_steps = 5
+        start_epsilon = 1
+        end_epsilon = 0.3
+        decay_steps = 10
         explorer = explorers.LinearDecayEpsilonGreedy(
             start_epsilon, end_epsilon, decay_steps,
             env.random_action)
@@ -182,7 +188,7 @@ def main():
         opt.setup(q_func)
 
         # rbuf_capacity = 5 * 10 ** 3
-        minibatch_size = 16
+        minibatch_size = 8
 
         # steps = 1000
         replay_start_size = 20
@@ -238,20 +244,23 @@ def main():
     train()
 
     # 用于计算本次训练中最大的准确率,及所选的特征以及训练过程中的平均准确率
-    max_accuracy = max(episode_accuracy)
-    max_index = episode_reward.index(max_accuracy)
-    best_feature = feature_list[max_index]
+    max_train_accuracy = max(train_accuracy)
+    max_evaluate_accuracy = max(evaluate_accuracy)
+    max_train_index = train_accuracy.index(max_train_accuracy)
+    max_evaluate_index = evaluate_accuracy.index(max_evaluate_accuracy)
+    best_train_feature = feature_list_train[max_train_index]
+    best_evaluate_feature = feature_list_evaluate[max_evaluate_index]
 
     average_accuracy = 0
-    for i in range(len(episode_accuracy) - 1):
-        average_accuracy = average_accuracy + episode_accuracy[i]
-    average_accuracy = average_accuracy / len(episode_accuracy)
+    for i in range(len(train_accuracy) - 1):
+        average_accuracy = average_accuracy + train_accuracy[i]
+    average_accuracy = average_accuracy / len(train_accuracy)
 
     # 写入文件的最后一行
     with open(result_file, 'a+') as f:
         f.write(
-            "The max reward of this train:{}, the feature selected are:{}, the average reward of this train:{}"
-                .format(max_accuracy, best_feature, average_accuracy))
+            "The max acxcuracy of the train:{}, the feature selected are:{}.\nThe max accuracy of the evaluate:{}, the feature selected are:{}\n.The average reward of this train:{}\n"
+                .format(max_train_accuracy, best_train_feature,  max_evaluate_accuracy, best_evaluate_feature, average_accuracy))
 
 
 if __name__ == '__main__':

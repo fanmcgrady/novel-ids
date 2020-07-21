@@ -10,10 +10,43 @@ def full_feature(data_path):
     processed_data, label = load_normalize_data(data_path)
     classifier = Classifier(processed_data, label)
     date = time.strftime('%Y_%m_%d')
+    # 统计一下平均数据
+    avg_accuracy = 0
+    avg_precision = 0
+    avg_recall = 0
+    average_f1 = 0
+    avg_false_alarm_rate = 0
+    avg_miss_alarm_rate = 0
+    avg_train_time = 0
+    avg_time_per_sample = 0
     for key in CLASSIFIER_POOL.keys():
         result = classifier.classify(CLASSIFIER_POOL.get(key))
+        avg_accuracy += result['Accuracy']
+        avg_precision += result['Precision']
+        avg_recall += result['Recall']
+        average_f1 += result['F1 Score']
+        avg_false_alarm_rate += result['False Alarm Rate']
+        avg_miss_alarm_rate += result['Miss Alarm Rate']
+        avg_train_time += result['Train Time']
+        avg_time_per_sample += result['Test Time For Per Sample']
         result_file = save_result(result, result_path, date, 'Full_feature', key)
+
     print('Training complete! The result was saved to '+result_path+result_file)
+
+    count = len(CLASSIFIER_POOL)
+    with open(result_path+'average_.txt', 'a+') as f:
+        f.write('----------------------------------------------------------\n')
+        f.write('Avg Accuracy : {}\n'.format(avg_accuracy/count))
+        f.write('Avg Precision : {}\n'.format(avg_precision/count))
+        f.write('Avg Recall : {}\n'.format(avg_recall/count))
+        f.write('Avg F1 Score : {}\n'.format(average_f1/count))
+        f.write('Avg False Alarm Rate : {}\n'.format(avg_false_alarm_rate/count))
+        f.write('Avg Miss Alarm Rate : {}\n'.format(avg_miss_alarm_rate/count))
+        f.write('Avg Train Time : {}\n'.format(avg_train_time/count))
+        f.write('Avg Test Time For Per Sample : {}\n'.format(avg_time_per_sample/count))
+        f.write('-------------Saved time: ' + time.strftime('%Y/%m/%d/%H:%M:%S') + '----------------\n')
+
+
 
 '''
 2015——Staudemeyer
@@ -32,6 +65,8 @@ def Staudemeyer_method(data_path):
     result_file = save_result(result, result_path, date, 'Staudemeyer', method)
     print('Training complete! The result was saved to ' + result_path + result_file)
 
+
+
 # 读取数据并且范化数据
 def load_normalize_data(path):
 
@@ -39,6 +74,8 @@ def load_normalize_data(path):
     processed_data = data_preprocessing(data)
 
     return processed_data, label
+
+
 
 # 保存结果
 def save_result(result, result_path, date, compare_object, method):
@@ -59,10 +96,7 @@ def save_result(result, result_path, date, compare_object, method):
     return result_file
 
 
-
-
 if __name__ == '__main__':
     # 使用全部特征的
     full_feature(data_path=data_path)
     # Staudemeyer_method(data_path=data_path)
-    # pass
