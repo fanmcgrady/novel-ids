@@ -29,7 +29,7 @@ state_size = 41 # 可观察的状态数
 action_size = 41  # 可选的特征数
 feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000 #
-net_layers = [64, 32] # 一个包含两个隐藏层的神经网络
+net_layers = [32, 64] # 一个包含两个隐藏层的神经网络
 
 result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%d%H%M'),args.maxf)
 
@@ -97,7 +97,7 @@ def main():
             action_list = []
 
             while not terminal:
-                action = agent.act(state)
+                action = agent.act(state, action_list)
                 if action not in action_list:
                     action_list.append(action)
                 state, reward, classify_result, terminal = env.step(action)
@@ -143,7 +143,7 @@ def main():
             while not terminal:
                 t += 1
                 action = agent.act_and_train(
-                    state, reward)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
+                    state, reward, action_list)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
                 if action not in action_list:
                     action_list.append(action)
                 state, reward, classify_result, terminal = env.step(action)
@@ -167,7 +167,7 @@ def main():
                             evaluate(env, agent, (episode + 1) / 10)
 
     def create_agent(env):
-        state_size = env.state_size + 8
+        state_size = env.state_size
         action_size = env.action_size
         q_func = QFunction(state_size, action_size)
 

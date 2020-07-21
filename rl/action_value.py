@@ -45,7 +45,7 @@ class DiscreteActionValue(ActionValue):
             action = np.argmax(data, axis=1)[0]
             print("action:", action)
             # 设置规则降低q_value，防止盯着一个动作选，降低10000即可。(前面降低了1，还是有点问题，变成10000试试)
-            if self.state[0][action] > 0:
+            if action in self.action_list:
 
                 print("Action chosen: {}, Data : {}, Reset Q value!!!!!!!!!!".format(action, data))
                 # data[0][action] /= 2
@@ -91,8 +91,8 @@ class DiscreteActionValue(ActionValue):
     def compute_expectation(self, beta):
         return F.sum(F.softmax(beta * self.q_values) * self.q_values, axis=1)
 
-    def load_current_state(self, state):
-        self.state = state
+    def load_current_action(self, action_list):
+        self.action_list = action_list
 
     def __repr__(self):
         return 'DiscreteActionValue greedy_actions:{} q_values:{}'.format(

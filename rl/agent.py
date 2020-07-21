@@ -17,7 +17,7 @@ from chainerrl.agents import double_dqn
 # 继承chainer的DDQN
 class MyDoubleDQN(double_dqn.DoubleDQN):
 
-    def act(self, state):
+    def act(self, state, action_list):
         with chainer.using_config('train', False):
             with chainer.no_backprop_mode():
                 action_value = self.model(
@@ -26,8 +26,8 @@ class MyDoubleDQN(double_dqn.DoubleDQN):
                 # 设置当前状态的state，保证在action_value选取动作的时候考虑一下目前已经选了的state
                 # 此处不能直接写action_value.load_current_state(state)
                 # 应该使用self.batch_states，保证在CPU和GPU中都能使用
-                action_value.load_current_state(
-                    self.batch_states([state], self.xp, self.phi)
+                action_value.load_current_action(
+                    action_list
                 )
                 q = float(action_value.max.data)
                 action = cuda.to_cpu(action_value.greedy_actions_with_state.data)[0]
@@ -47,7 +47,7 @@ class MyDoubleDQN(double_dqn.DoubleDQN):
         # chanierrl的返回
         return action
 
-    def act_and_train(self, state, reward):
+    def act_and_train(self, state, reward, action_list):
 
         with chainer.using_config('train', False):
             with chainer.no_backprop_mode():
@@ -57,8 +57,8 @@ class MyDoubleDQN(double_dqn.DoubleDQN):
                 # 设置当前状态的state，保证在action_value选取动作的时候考虑一下目前已经选了的state
                 # 此处不能直接写action_value.load_current_state(state)
                 # 应该使用self.batch_states，保证在CPU和GPU中都能使用
-                action_value.load_current_state(
-                    self.batch_states([state], self.xp, self.phi)
+                action_value.load_current_action(
+                    action_list
                 )
                 q = float(action_value.max.data)
                 greedy_action = cuda.to_cpu(action_value.greedy_actions_with_state.data)[
