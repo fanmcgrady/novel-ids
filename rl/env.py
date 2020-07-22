@@ -83,18 +83,20 @@ class MyEnv:
         self.reward_dict[temp] = [reward, classify_result]
 
     def get_one_hot(self, current_result):
-        # 选了哪些特征的index
-        # one_hot_state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
-        # state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
-        state = []
-        short_state = self.state_index
-        for i in self.state_index:
-            state.append(self.average[i])
+        # 1、使用0或1
+        # state = [1 if i in self.state_index else 0 for i in range(41)]
+        # 2、使用平均值
+        one_hot_state = [1 if i in self.state_index else 0 for i in range(self.state_size)]
+        state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
 
-        for i in range(10 - len(self.state_index)):
-            state.append(0)
+        # 3、使用选定特征的平均值+补0
+        # state = []
+        # for i in self.state_index:
+        #     state.append(self.average[i])
+        #
+        # for i in range(10 - len(self.state_index)):
+        #     state.append(0)
 
-        # state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
         count = len(self.state_index)
         accuracy = current_result.get('Accuracy', 0)
         precision = current_result.get('Precision', 0)
