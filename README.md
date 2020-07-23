@@ -2,19 +2,33 @@
 A novel intrusion detection scheme based on RL
 
 ## Dataset 
-NSL-KDD
+NSL-KDD  
+Min-Max之后对某些分类器效果不好，改成了L2的Normalization
 
-## 评价指标
+## Metrics
 Accuracy  
-Precision
-Recall
-F1 Score
+Precision  
+Recall  
+F1 Score  
+False Alarm Rate  
+Miss Alarm Rate  
 Test time for per sample
 
+##Classifier
+RandomForest  
+KNN  
+DT  
+NB  
+MLP  
+Ada  
+Bagging  
+SVM  
+GBDT  
+
+
 ## TODO
-1.有些分类器效果不好，需要preprocessing一下数据
-2.RL部分的代码需要refactor一下
-3.其他文献的复现需要继续完成
+1.修改回报函数  
+2.其他文献的复现需要继续完成  
 
 
 
