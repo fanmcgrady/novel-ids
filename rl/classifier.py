@@ -3,7 +3,7 @@ from sklearn import metrics
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import GaussianNB, MultinomialNB,BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
@@ -27,12 +27,17 @@ CLASSIFIER_POOL = {
                                      max_depth=1, random_state=0)
 }
 
-CLASSIFIER_POOL_TEST = {'DT': DecisionTreeClassifier()}
+CLASSIFIER_POOL_TEST = {'NB':GaussianNB()}
 
 class Classifier():
     def __init__(self, data, label):
         self.data = data
         self.label = label
+
+
+    # def encoding(self):
+    #     classifier = ['RandomForest', 'KNN', 'NB', 'DT', 'MLP', 'Ada', 'BAGGING', 'SVM', 'GBDT']
+    #     return classifier.index(self.classifier)
 
     # feature包含选择的特征的index,默认提取全部特征
     def classify(self, classifier, feature=None):

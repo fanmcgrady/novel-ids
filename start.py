@@ -25,7 +25,7 @@ parser.add_argument('--cls', type=str, default='DT')
 args = parser.parse_args()
 
 # 可变参数
-state_size = 41 # 可观察的状态数
+state_size = 10 # 可观察的状态数
 action_size = 41  # 可选的特征数
 feature_max_count = args.maxf  # 选取的特征数目大于该值时，reward为0，用于当特征数目在该范围内时，成功率最多可以到达多少
 MAX_EPISODE = 1000 #
@@ -42,15 +42,21 @@ result_file = 'result/result-{}-{}-{}.txt'.format(args.cls, time.strftime('%Y%m%
 
 # 用这个逻辑替代原来的my_train的逻辑，只需要把agent加入即可，agent应该是不需要修改的
 
+
+
 def main():
     # 保存训练中每一轮的回报
     train_reward = []
+    # 保存评估中每一轮的回报
+    evaluate_reward = []
     # 保存训练中每一轮的分类准确率
     train_accuracy = []
-    # 用来保存效果最优的特征集合
+    # 保存评估中每一轮的分类准确率
     evaluate_accuracy = []
+    # 用来保存效果最优的特征集合
     feature_list_train = []
     feature_list_evaluate = []
+
 
     class QFunction(chainer.Chain):
         def __init__(self, obs_size, n_actions, n_hidden_channels=None):
@@ -111,18 +117,20 @@ def main():
                     with open(result_file, 'a+') as f:
                         f.write(
                             "--------------------------------------------------------------------------------------------------\n"
-                            "evaluate episode:{}, reward = {}, accuracy = {}, action = {}\n"
+                            "Evaluate episode:{}, Reward = {}, Accuracy = {}, FAR = {}, MAR = {}, Action = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, classify_result, action_list)
+                                .format(current, reward, classify_result['Accuracy'], classify_result['False Alarm Rate'], classify_result['Miss Alarm Rate'], action_list)
                         )
                         print(
                             "--------------------------------------------------------------------------------------------------\n"
-                            "evaluate episode:{}, reward = {}, accuracy = {},action = {}\n"
+                            "Evaluate episode:{}, Reward = {}, Accuracy = {}, FAR = {}, MAR = {}, Action = {}\n"
                             "-------------------------------------------------------------------------------------------------\n"
-                                .format(current, reward, classify_result, action_list)
+                                .format(current, reward, classify_result['Accuracy'], classify_result['False Alarm Rate'], classify_result['Miss Alarm Rate'], action_list)
                         )
+                    # 加入本轮次评估的回报,后面可能需要
+                    evaluate_reward.append(reward)
                     # 每次评估添加本次评估准确率
-                    evaluate_accuracy.append(classify_result)
+                    evaluate_accuracy.append(classify_result['Accuracy'])
                     # 同时添加对应特征
                     feature_list_evaluate.append(action_list)
 
@@ -153,20 +161,20 @@ def main():
                 if action not in action_list:
                     action_list.append(action)
                 state, reward, classify_result, terminal = env.step(action)
-                print("episode:{}, t:{}, action:{}, accuracy = {} reward = {}".format(episode, t, action_list, classify_result, reward))
+                print("Episode:{}, t:{}, Action:{}, Accuracy = {}, FAR = {}, MAR = {}, Reward = {}".format(episode, t, action_list, classify_result['Accuracy'], classify_result['False Alarm Rate'], classify_result['Miss Alarm Rate'], reward))
 
                 if terminal:
                     with open(result_file, 'a+') as f:
-                        f.write("train episode:{}, reward = {}, accuracy = {}, action = {}\n"
-                                .format(episode, reward , classify_result, action_list))
-                        print("train episode:{}, reward = {}, accuracy = {},action = {}\n"
-                                .format(episode, reward, classify_result, action_list))
+                        f.write("Train episode:{}, Reward = {}, Accuracy = {}, FAR = {}, MAR = {}, Action = {}\n"
+                                .format(episode, reward , classify_result['Accuracy'], classify_result['False Alarm Rate'], classify_result['Miss Alarm Rate'], action_list))
+                        print("Train episode:{}, Reward = {}, Accuracy = {} ,FAR = {}, MAR = {}, Action = {}\n"
+                                .format(episode, reward, classify_result['Accuracy'], classify_result['False Alarm Rate'], classify_result['Miss Alarm Rate'], action_list))
 
                         agent.stop_episode()
                         # 加入轮次训练的回报,后面可能需要
                         train_reward.append(reward)
                         # 加入本轮次训练的准确率
-                        train_accuracy.append(classify_result)
+                        train_accuracy.append(classify_result['Accuracy'])
                         # 本轮次对应所选的特征
                         feature_list_train.append(action_list)
                         if (episode + 1) % 10 == 0 and episode != 0:
@@ -246,28 +254,45 @@ def main():
     # 用于计算本次训练中最大的准确率,及所选的特征以及训练过程中的平均准确率
     max_train_accuracy = max(train_accuracy)
     max_evaluate_accuracy = max(evaluate_accuracy)
-    max_train_index = train_accuracy.index(max_train_accuracy)
-    max_evaluate_index = evaluate_accuracy.index(max_evaluate_accuracy)
-    best_train_feature = feature_list_train[max_train_index]
-    best_evaluate_feature = feature_list_evaluate[max_evaluate_index]
+    max_train_reward = max(train_reward)
+    max_evaluate_reward = max(evaluate_reward)
+    # 取索引
+    max_train_accuracy_index = train_accuracy.index(max_train_accuracy)
+    max_evaluate_accuracy_index = evaluate_accuracy.index(max_evaluate_accuracy)
+    max_train_reward_index = train_reward.index(max_train_reward)
+    max_evaluate_reward_index = evaluate_reward.index(max_evaluate_reward)
+    # 找特征
+    best_train_accuracy_feature = feature_list_train[max_train_accuracy_index]
+    best_evaluate_accuracy_feature = feature_list_evaluate[max_evaluate_accuracy_index]
+    best_train_reward_feature = feature_list_train[max_train_reward_index]
+    best_evaluate_reward_feature = feature_list_train[max_evaluate_reward_index]
 
-    average_accuracy = 0
-    for i in range(len(train_accuracy) - 1):
-        average_accuracy = average_accuracy + train_accuracy[i]
-    average_accuracy = average_accuracy / len(train_accuracy)
+    # 统计训练过程中reward的平均值以及变化趋势
+    average_reward = 0
+    for i in range(len(train_reward) - 1):
+        average_reward = average_reward + train_reward[i]
+    average_reward = average_reward / len(train_reward)
 
-    # 写入文件的最后一行
+    # 写入文件训练过程统计结果
     with open(result_file, 'a+') as f:
-        f.write(
-            "The max acxcuracy of the train:{}, the feature selected are:{}.\nThe max accuracy of the evaluate:{}, the feature selected are:{}\n.The average reward of this train:{}\n"
-                .format(max_train_accuracy, best_train_feature,  max_evaluate_accuracy, best_evaluate_feature, average_accuracy))
+        f.write("Train reward:{}".format(train_reward))
+        f.write("The max accuracy of the train:{}, the feature selected are:{}.\n".format(max_train_accuracy,
+                                                                                          best_train_accuracy_feature))
+        f.write("The max accuracy of the evaluate:{}, the feature selected are:{}.\n".format(max_evaluate_accuracy,
+                                                                                             best_evaluate_accuracy_feature))
+        f.write("The max reward of the train:{}, the feature selected are:{}\n".format(max_train_reward,
+                                                                                       best_train_reward_feature))
+        f.write("The max reward of the evaluate:{}, the feature selected are:{}\n".format(max_evaluate_reward,
+                                                                                       best_evaluate_reward_feature))
+        f.write("The average reward of this train:{}.\n".format(average_reward))
+
 
 
 if __name__ == '__main__':
     start_time = time.time()
     main()
     elapsed = time.time() - start_time
-    print("elapsed: {}".format(elapsed))
+    print("Time: {}".format(elapsed))
     # 训练时间
     with open(result_file, 'a+') as f:
-        f.write("Training elapsed:{} seconds".format(elapsed))
+        f.write("Training time:{} seconds".format(elapsed))

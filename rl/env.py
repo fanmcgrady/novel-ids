@@ -39,12 +39,15 @@ class MyEnv:
         reward, classify_result = self.get_reward()
 
         # reward = random.random()*100
-        return self.get_one_hot(classify_result), reward, classify_result['Accuracy'], self.done
+        return self.get_one_hot(classify_result), reward, classify_result, self.done
 
     def reset(self):
         self.done = False
         self.state_index = set()
+        # 记录前一轮的准确率、检测率、以及召回率
         self.pre_accuracy = 0
+        self.pre_precision = 0
+        self.pre_recall = 0
         self.current_result = {}
 
         return self.get_one_hot(self.current_result)
@@ -55,6 +58,8 @@ class MyEnv:
         if temp in self.reward_dict.keys():
             item = self.reward_dict.get(temp)
             self.pre_accuracy = item[1]['Accuracy']
+            self.pre_precision = item[1]['Precision']
+            self.pre_recall = item[1]['Recall']
             return item[0], item[1]
         else:
             # 获得分类结果的字典
@@ -63,16 +68,69 @@ class MyEnv:
             #     result += 0.2*element
 
             accuracy = classify_result['Accuracy']
-            reward = -1
-            # 越选指标越小的情况
+            precision = classify_result['Precision']
+            recall = classify_result['Recall']
+            time = classify_result['Test Time For Per Sample']
+
+            # 公式:reward = r_a * 0.4 + r_p * 0.2 + r_r * 0.2 + r_t * 0.2
+
+            # 看看各个指标的情况
+
+            # 准确率
+            # 增加了一个feature反而减小了
             if self.pre_accuracy > accuracy:
-                reward = -1
-            # 选对的情况
+                r_a = -2
+            # 准确率增大
             else:
-                reward = accuracy
+                if accuracy < 0.80:
+                    r_a = 0
+                elif accuracy < 0.95:
+                    r_a = 0.5
+                else:
+                    r_a = 1
+
+            # 检测率
+            # 增加了一个feature反而减小了
+            if self.pre_precision > precision:
+                r_p = -2
+            # 检测率增大
+            else:
+                if precision < 0.80:
+                    r_p = 0
+                elif precision < 0.95:
+                    r_p = 0.5
+                else:
+                    r_p = 1
+
+            # 召回率
+            # 增加了一个feature反而减小了
+            if self.pre_recall > recall:
+                r_r = -2
+            # 召回率增大
+            else:
+                if recall < 0.80:
+                    r_r = 0
+                elif recall < 0.95:
+                    r_r = 0.5
+                else:
+                    r_r = 1
+
+            # 训练时间,如果比平均时间还短,那么奖励值为0
+            if time > 5.43e-5:
+                r_t = 0
+            elif time > 1.00e-5:
+                r_t = 0.5
+            else:
+                r_t = 1
+
+            # 奖励值权重公式
+            reward = r_a * 0.5 + r_p * 0.2 + r_r * 0.2 + r_t * 0.1
+
 
             self.add_dict(reward, classify_result)
             self.pre_accuracy = accuracy
+            self.pre_precision = precision
+            self.pre_recall = recall
 
             return reward, classify_result
 
@@ -90,12 +148,12 @@ class MyEnv:
         state = [self.average[i] if one_hot_state[i] > 0 else 0 for i in range(len(one_hot_state))]
 
         # 3、使用选定特征的平均值+补0
-        # state = []
-        # for i in self.state_index:
-        #     state.append(self.average[i])
-        #
-        # for i in range(10 - len(self.state_index)):
-        #     state.append(0)
+        state = []
+        for i in self.state_index:
+            state.append(self.average[i])
+
+        for i in range(10 - len(self.state_index)):
+            state.append(0)
 
         count = len(self.state_index)
         accuracy = current_result.get('Accuracy', 0)
