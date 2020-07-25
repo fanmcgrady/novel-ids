@@ -275,7 +275,7 @@ def main():
 
     # 写入文件训练过程统计结果
     with open(result_file, 'a+') as f:
-        f.write("Train reward:{}".format(train_reward))
+        f.write("Train reward:{}\n".format(train_reward))
         f.write("The max accuracy of the train:{}, the feature selected are:{}.\n".format(max_train_accuracy,
                                                                                           best_train_accuracy_feature))
         f.write("The max accuracy of the evaluate:{}, the feature selected are:{}.\n".format(max_evaluate_accuracy,

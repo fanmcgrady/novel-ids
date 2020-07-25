@@ -14,7 +14,7 @@ import time
 
 
 CLASSIFIER_POOL = {
-    'RandomForest': RandomForestClassifier(random_state=0, n_estimators=500),
+    'RandomForest': RandomForestClassifier(random_state=0, n_estimators=50),
     'KNN': KNeighborsClassifier(),
     'NB': GaussianNB(),
     'DT': DecisionTreeClassifier(),
@@ -27,8 +27,7 @@ CLASSIFIER_POOL = {
                                      max_depth=1, random_state=0)
 }
 
-CLASSIFIER_POOL_TEST = {'BAGGING':BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5)}
-
+CLASSIFIER_POOL_TEST = {'SVM':SVC(kernel='rbf', probability=True, gamma='auto', max_iter=1000)}
 class Classifier():
     def __init__(self, data, label):
         self.data = data
