@@ -70,11 +70,15 @@ class MyEnv:
             accuracy = classify_result['Accuracy']
             precision = classify_result['Precision']
             recall = classify_result['Recall']
-            time = classify_result['Test Time For Per Sample']
+            # time = classify_result['Test Time For Per Sample']
 
-            # 公式:reward = r_a * 0.4 + r_p * 0.2 + r_r * 0.2 + r_t * 0.2
+            # 方案1：仅考虑Accuracy
+            # reward = r_a = accuracy
+            # 方案2：考虑Accuracy、Precision、Recall
+            # reward = r_a * 0.4 + r_p *0.3 + r_r * 0.3
+            # 方案3：考虑Accuracy、Precision、Recall、Time
+            # reward = r_a * 0.4 + r_p * 0.2 + r_r * 0.2 + r_t * 0.2
 
-            # 看看各个指标的情况
 
             # 准确率
             # 增加了一个feature反而减小了
@@ -115,16 +119,22 @@ class MyEnv:
                 else:
                     r_r = 1
 
-            # 训练时间,如果比平均时间还短,那么奖励值为0
-            if time > 5.43e-5:
-                r_t = 0
-            elif time > 1.00e-5:
-                r_t = 0.5
-            else:
-                r_t = 1
+            # 训练时间,如果比平均时间还短,那么奖励值为0(暂时先不使用)
+            # if time > 5.43e-5:
+            #     r_t = 0
+            # elif time > 1.00e-5:
+            #     r_t = 0.5
+            # else:
+            #     r_t = 1
 
-            # 奖励值权重公式
-            reward = r_a * 0.5 + r_p * 0.2 + r_r * 0.2 + r_t * 0.1
+            # 方案1
+            # reward = r_a
+
+            # 方案2
+            reward = r_a * 0.4 + r_p * 0.3 + r_r * 0.3
+
+            # 方案3
+            # reward = r_a * 0.5 + r_p * 0.2 + r_r * 0.2 + r_t * 0.1
 
 
             self.add_dict(reward, classify_result)

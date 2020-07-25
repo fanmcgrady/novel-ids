@@ -27,7 +27,7 @@ CLASSIFIER_POOL = {
                                      max_depth=1, random_state=0)
 }
 
-CLASSIFIER_POOL_TEST = {'NB':GaussianNB()}
+CLASSIFIER_POOL_TEST = {'BAGGING':BaggingClassifier(DecisionTreeClassifier(), max_samples=0.5, max_features=0.5)}
 
 class Classifier():
     def __init__(self, data, label):
