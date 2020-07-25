@@ -14,7 +14,7 @@ import time
 
 
 CLASSIFIER_POOL = {
-    'RandomForest': RandomForestClassifier(random_state=0, n_estimators=500),
+    'RandomForest': RandomForestClassifier(random_state=0, n_estimators=50),
     'KNN': KNeighborsClassifier(),
     'NB': GaussianNB(),
     'DT': DecisionTreeClassifier(),
