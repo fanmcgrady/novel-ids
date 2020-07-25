@@ -92,7 +92,7 @@ class MyEnv:
                 #     r_a = 0.5
                 # else:
                 #     r_a = 1
-                r_a = 1
+                r_a = accuracy
 
             # 检测率
             # # 增加了一个feature反而减小了
