@@ -86,39 +86,39 @@ class MyEnv:
                 r_a = -1
             # 准确率增大
             else:
-                # if accuracy < 0.80:
-                #     r_a = 0
-                # elif accuracy < 0.95:
-                #     r_a = 0.5
-                # else:
-                #     r_a = 1
-                r_a = accuracy
+                if accuracy < 0.80:
+                    r_a = 0
+                elif accuracy < 0.95:
+                    r_a = 0.5
+                else:
+                    r_a = 1
+                # r_a = accuracy
 
             # 检测率
-            # # 增加了一个feature反而减小了
-            # if self.pre_precision > precision:
-            #     r_p = -2
-            # # 检测率增大
-            # else:
-            #     if precision < 0.80:
-            #         r_p = 0
-            #     elif precision < 0.95:
-            #         r_p = 0.5
-            #     else:
-            #         r_p = 1
+            # 增加了一个feature反而减小了
+            if self.pre_precision > precision:
+                r_p = -2
+            # 检测率增大
+            else:
+                if precision < 0.80:
+                    r_p = 0
+                elif precision < 0.95:
+                    r_p = 0.5
+                else:
+                    r_p = 1
 
             # 召回率
             # 增加了一个feature反而减小了
-            # if self.pre_recall > recall:
-            #     r_r = -2
-            # # 召回率增大
-            # else:
-            #     if recall < 0.80:
-            #         r_r = 0
-            #     elif recall < 0.95:
-            #         r_r = 0.5
-            #     else:
-            #         r_r = 1
+            if self.pre_recall > recall:
+                r_r = -2
+            # 召回率增大
+            else:
+                if recall < 0.80:
+                    r_r = 0
+                elif recall < 0.95:
+                    r_r = 0.5
+                else:
+                    r_r = 1
 
             # 训练时间,如果比平均时间还短,那么奖励值为0(暂时先不使用)
             # if time > 5.43e-5:
@@ -129,10 +129,10 @@ class MyEnv:
             #     r_t = 1
 
             # 方案1
-            reward = r_a
+            # reward = r_a
 
             # 方案2
-            # reward = r_a * 0.4 + r_p * 0.3 + r_r * 0.3
+            reward = r_a * 0.4 + r_p * 0.3 + r_r * 0.3
 
             # 方案3
             # reward = r_a * 0.5 + r_p * 0.2 + r_r * 0.2 + r_t * 0.1
