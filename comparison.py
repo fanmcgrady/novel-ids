@@ -20,7 +20,7 @@ def full_feature(data_path):
     # avg_train_time = 0
     # avg_time_per_sample = 0
     for key in CLASSIFIER_POOL_TEST.keys():
-        result = classifier.classify(CLASSIFIER_POOL_TEST.get(key))
+        result = classifier.classify(CLASSIFIER_POOL_TEST.get(key), [8, 31, 22, 24, 5, 32])
         # avg_accuracy += result['Accuracy']
         # avg_precision += result['Precision']
         # avg_recall += result['Recall']
@@ -29,7 +29,7 @@ def full_feature(data_path):
         # avg_miss_alarm_rate += result['Miss Alarm Rate']
         # avg_train_time += result['Train Time']
         # avg_time_per_sample += result['Test Time For Per Sample']
-        result_file = save_result(result, result_path, date, 'SVM_Full_Result_', key)
+        result_file = save_result(result, result_path, date, 'RandomForest_Result_', key)
 
     print('Training complete! The result was saved to '+result_path+result_file)
 

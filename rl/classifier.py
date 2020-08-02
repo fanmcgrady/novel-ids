@@ -27,7 +27,7 @@ CLASSIFIER_POOL = {
                                      max_depth=1, random_state=0)
 }
 
-CLASSIFIER_POOL_TEST = {'SVM':SVC(kernel='rbf', probability=True, gamma='auto', max_iter=1000)}
+CLASSIFIER_POOL_TEST = {'RandomForest':RandomForestClassifier(random_state=0, n_estimators=50)}
 class Classifier():
     def __init__(self, data, label):
         self.data = data
