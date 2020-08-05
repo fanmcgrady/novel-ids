@@ -58,6 +58,7 @@ def main():
     feature_list_evaluate = []
 
 
+
     class QFunction(chainer.Chain):
         def __init__(self, obs_size, n_actions, n_hidden_channels=None):
             super(QFunction, self).__init__()
@@ -276,6 +277,8 @@ def main():
     # 写入文件训练过程统计结果
     with open(result_file, 'a+') as f:
         f.write("Train reward:{}\n".format(train_reward))
+        # 打印accuracy,用于绘图
+        f.write("Train accuracy:{}\n".format(train_accuracy))
         f.write("The max accuracy of the train:{}, the feature selected are:{}.\n".format(max_train_accuracy,
                                                                                           best_train_accuracy_feature))
         f.write("The max accuracy of the evaluate:{}, the feature selected are:{}.\n".format(max_evaluate_accuracy,
@@ -295,4 +298,5 @@ if __name__ == '__main__':
     print("Time: {}".format(elapsed))
     # 训练时间
     with open(result_file, 'a+') as f:
+
         f.write("Training time:{} seconds".format(elapsed))
