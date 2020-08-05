@@ -57,6 +57,9 @@ def main():
     feature_list_train = []
     feature_list_evaluate = []
 
+    train_precision = []
+    train_recall = []
+
 
 
     class QFunction(chainer.Chain):
@@ -176,6 +179,8 @@ def main():
                         train_reward.append(reward)
                         # 加入本轮次训练的准确率
                         train_accuracy.append(classify_result['Accuracy'])
+                        train_precision.append(classify_result['Precision'])
+                        train_recall.append(classify_result['Recall'])
                         # 本轮次对应所选的特征
                         feature_list_train.append(action_list)
                         if (episode + 1) % 10 == 0 and episode != 0:
@@ -278,7 +283,9 @@ def main():
     with open(result_file, 'a+') as f:
         f.write("Train reward:{}\n".format(train_reward))
         # 打印accuracy,用于绘图
-        f.write("Train accuracy:{}\n".format(train_accuracy))
+        f.write("Train precision:{}\n".format(train_precision))
+        # 打印recall,用于绘图
+        f.write("Train recall:{}\n".format(train_recall))
         f.write("The max accuracy of the train:{}, the feature selected are:{}.\n".format(max_train_accuracy,
                                                                                           best_train_accuracy_feature))
         f.write("The max accuracy of the evaluate:{}, the feature selected are:{}.\n".format(max_evaluate_accuracy,
